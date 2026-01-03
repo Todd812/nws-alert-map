@@ -35,14 +35,14 @@ Upload both files to your server and open the map file and see the NWS alerts.
 
 ### Focus on a Specific State
 Append a state abbreviation:  
-`index.html?state=TX` → Centers on Texas
+`https://yourdomain.com/weatheralerts.php?state=TX` → Centers on Texas
 
 ### Show Only Specific Alerts
 Use the `alerts` parameter (comma-separated, exact alert names):  
-`index.html?alerts=Tornado Warning,Flash Flood Warning,Red Flag Warning`
+`https://yourdomain.com/weatheralerts.php?alerts=Tornado Warning,Flash Flood Warning,Red Flag Warning`
 
 Example: Only fire weather alerts  
-`https://yourdomain.com/?alerts=Red Flag Warning,Fire Weather Watch,Extreme Fire Danger`
+`https://yourdomain.com/weatheralerts.php?alerts=Red Flag Warning,Fire Weather Watch,Extreme Fire Danger`
 
 ### Settings & Filters
 Click the ⚙️ gear icon in the bottom-right to:
