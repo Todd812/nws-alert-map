@@ -12,6 +12,10 @@ Upload both files to your server.  Rename the combined_zones40_fixed (7).json to
 
 View Demo: https://www.stormsalert.com/dashboards/usweatherdashboard/allweatheralertsmap
 
+## Basemap and NWS API codes
+
+Feel free to change the basemap inside the code.  You MUST make sure to attribute correctly in order to use the basemap.  You are required to add in correct user-agent headers including your contact email for the NWS calls on line 1176.
+
 ## Features
 
 - **Real-time NWS Alerts** – Fetches active alerts directly from the official NWS API (`api.weather.gov`)
