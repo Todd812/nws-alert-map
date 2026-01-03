@@ -6,7 +6,7 @@ Interactive real-time map of NWS weather alerts for all US zones, counties, and 
 An interactive web map displaying real-time National Weather Service (NWS) active alerts across the United States, with smart zone highlighting, customizable alert colors, and advanced filtering.
 
 # Install
-Upload both files to your server.  Open https://yourdomain.com/weatheralerts.php in your browser.
+Upload the files to your server.  Open https://yourdomain.com/weatheralerts.php in your browser.  You don't need to unzip the shapefiles they are processed through the map.
 
 ## Live Demo
 
