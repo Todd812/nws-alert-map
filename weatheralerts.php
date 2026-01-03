@@ -1173,7 +1173,7 @@ function reprocessAlerts() {
 
 function updateAlerts() {
     const headers = {
-        'User-Agent': 'StormsAlertApp (contact@stormsalert.com)',
+        'User-Agent': 'My Weather App (contact@myweatherapp.com)',
         'Accept': 'application/geo+json'
     };
 
