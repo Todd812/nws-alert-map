@@ -10,7 +10,7 @@ Upload both files to your server.  Rename the combined_zones40_fixed (7).json to
 
 ## Live Demo
 
-[View the interactive map →]([https://your-custom-domain.com/weather-alerts-map/](https://www.stormsalert.com/dashboards/usweatherdashboard/allweatheralertsmap))
+View Demo: https://www.stormsalert.com/dashboards/usweatherdashboard/allweatheralertsmap
 
 ## Features
 
