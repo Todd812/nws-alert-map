@@ -6,6 +6,7 @@ const shapefileLayers = [
         loadOnStart: false,
         style: { fill: false, weight: 1, opacity: 0.6, color: "#888888" }
     },
+    
     { 
         id: "states", 
         name: "US State Boundaries", 
