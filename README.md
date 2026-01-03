@@ -16,7 +16,7 @@ View Demo: https://www.stormsalert.com/dashboards/usweatherdashboard/allweathera
 
 - **Real-time NWS Alerts** – Fetches active alerts directly from the official NWS API (`api.weather.gov`)
 - **Polygon & Zone-Based Alerts** – Shows both polygonal alerts and zone-based (UGC) alerts
-- **Smart Zone Highlighting** – Fire weather zones automatically highlight and briefly flash when a new alert is issued
+- **Smart Zone Highlighting** – New alerts automatically highlight and briefly flash when a new alert is issued.  Expired alerts removed from the map on updates.
 - **Customizable Alert Colors** – Users can change colors for any alert type and save preferences
 - **Alert Filtering** – Toggle visibility of individual alert types (warnings, watches, advisories, etc.)
 - **Persistent Settings** – Color and visibility preferences saved in browser localStorage
