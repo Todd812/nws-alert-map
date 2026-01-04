@@ -150,7 +150,10 @@
             margin-bottom: 6px;
             line-height: 1.3;
         }
-        /* LSR-specific styling in modal - orange, no yellow */
+        /* Only LSR items show the event type and in orange */
+        .alert-item:not(.lsr) .alert-event {
+            display: none;
+        }
         .alert-item.lsr {
             border-left: 5px solid #FF8C00 !important;
         }
@@ -682,7 +685,7 @@ function loadLSRLayer() {
                     L.DomEvent.stopPropagation(e);
                     const fakeAlerts = [{
                         properties: {
-                            event: `${p.typetext || 'Storm Report'}`,
+                            event: p.typetext || 'Storm Report',   // Pure type, no "LSR:" prefix
                             headline: magnitude ? `${magnitude} reported` : p.typetext,
                             description: remark || 'No additional details',
                             sent: p.valid,
@@ -1161,7 +1164,7 @@ function showAlertsModal(title, alerts) {
 
         sortedAlerts.forEach(alert => {
             const p = alert.properties;
-            const isLSR = p.event && p.event.startsWith('LSR:');
+            const isLSR = p.event && !alertColors.hasOwnProperty(p.event); // LSRs don't have entries in alertColors
             const itemClass = isLSR ? 'alert-item lsr' : 'alert-item';
             const color = getAlertColor(p.event) || '#888888';
 
