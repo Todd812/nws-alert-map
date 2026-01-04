@@ -150,6 +150,14 @@
             margin-bottom: 6px;
             line-height: 1.3;
         }
+        /* LSR-specific styling in modal - orange, no yellow */
+        .alert-item.lsr {
+            border-left: 5px solid #FF8C00 !important;
+        }
+        .alert-item.lsr .alert-event {
+            color: #FF8C00 !important;
+        }
+
         .alert-description {
             font-size: 15px;
             line-height: 1.7;
@@ -486,7 +494,7 @@ L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Canvas/World
                  'Storm reports &copy; NOAA/NWS Storm Prediction Center'
 }).addTo(map);
 
-// Create panes for each shapefile layer
+// Panes
 shapefileLayers.forEach((layer, index) => {
     const paneName = `overlayPane_${layer.id}`;
     map.createPane(paneName);
@@ -498,6 +506,9 @@ map.getPane('zonePane').style.zIndex = 400;
 
 map.createPane('alertPane');
 map.getPane('alertPane').style.zIndex = 600;
+
+map.createPane('lsrPane');
+map.getPane('lsrPane').style.zIndex = 650;
 
 let overlayLayers = {};
 let layerVisibility = {};
@@ -561,6 +572,138 @@ function toggleOverlayLayer(id, enabled) {
             map.removeLayer(overlayLayers[id]);
         }
     }
+}
+
+// === Local Storm Reports (LSR) Layer ===
+const lsrColors = {
+    'AVALANCHE': '#F0F8FF',
+    'BLIZZARD': '#87CEEB',
+    'BLOWING DUST': '#CD853F',
+    'COASTAL FLOOD': '#20B2AA',
+    'DEBRIS FLOW': '#A0522D',
+    'DENSE FOG': '#A9A9A9',
+    'DOWNBURST': '#696969',
+    'DUST STORM': '#B8860B',
+    'EXCESSIVE HEAT': '#FF4500',
+    'EXTREME COLD': '#0000FF',
+    'EXTREME HEAT': '#FF0000',
+    'EXTR WIND CHILL': '#696969',
+    'FLASH FLOOD': '#228B22',
+    'FLOOD': '#32CD32',
+    'FOG': '#C0C0C0',
+    'FREEZE': '#696969',
+    'FREEZING RAIN': '#8A2BE2',
+    'FUNNEL CLOUD': '#FF4500',
+    'HAIL': '#00FF00',
+    'HEAVY RAIN': '#006400',
+    'HEAVY SLEET': '#696969',
+    'HEAVY SNOW': '#00FFFF',
+    'HIGH ASTR TIDES': '#696969',
+    'HIGH SURF': '#00CED1',
+    'HIGH SUST WINDS': '#696969',
+    'ICE JAM': '#696969',
+    'ICE STORM': '#9932CC',
+    'LANDSLIDE': '#8B4513',
+    'LANDSPOUT': '#696969',
+    'LIGHTNING': '#FF8C00',
+    'LOW ASTR TIDES': '#696969',
+    'MARINE TSTM WIND': '#696969',
+    'MISC MRN/SRF HZD': '#696969',
+    'NON-TSTM WND DMG': '#DAA520',
+    'NON-TSTM WND GST': '#D2691E',
+    'RAIN': '#696969',
+    'RIP CURRENTS': '#40E0D0',
+    'SEICHE': '#696969',
+    'SLEET': '#9370DB',
+    'SNOW': '#ADD8E6',
+    'SNOW/ICE DMG': '#696969',
+    'SNOW SQUALL': '#4682B4',
+    'STORM SURGE': '#008080',
+    'TORNADO': '#FF0000',
+    'TROPICAL CYCLONE': '#696969',
+    'TROPICAL STORM': '#696969',
+    'TSTM WND DMG': '#FF8C00',
+    'TSTM WND GST': '#FF8C00',
+    'WATER SPOUT': '#FF1493',
+    'WATERSPOUT': '#FF1493',
+    'WILDFIRE': '#8B0000',
+    'WIND CHILL': '#4169E1',
+    'default': '#696969'
+};
+
+let lsrLayerGroup = L.layerGroup();
+const LSR_VISIBILITY_KEY = 'lsrLayerVisibility';
+let lsrVisible = false;
+
+try {
+    const saved = localStorage.getItem(LSR_VISIBILITY_KEY);
+    lsrVisible = saved ? JSON.parse(saved) : false;
+} catch(e) {}
+
+function toggleLSRLayer(enabled) {
+    lsrVisible = enabled;
+    localStorage.setItem(LSR_VISIBILITY_KEY, JSON.stringify(enabled));
+
+    if (enabled) {
+        if (lsrLayerGroup.getLayers().length === 0) {
+            loadLSRLayer();
+        }
+        map.addLayer(lsrLayerGroup);
+    } else {
+        map.removeLayer(lsrLayerGroup);
+    }
+}
+
+function loadLSRLayer() {
+    if (lsrLayerGroup.getLayers().length > 0) return;
+
+    fetch('https://mesonet.agron.iastate.edu/geojson/lsr.geojson?hours=12')
+        .then(r => r.json())
+        .then(data => {
+            data.features.forEach(feature => {
+                const p = feature.properties;
+                const typetext = (p.typetext || 'UNKNOWN').toUpperCase().trim();
+                const color = lsrColors[typetext] || lsrColors['default'];
+
+                const magnitude = p.magnitude ? `${p.magnitude} ${p.unit || ''}`.trim() : '';
+                const remark = p.remark ? p.remark.trim() : 'No remarks';
+
+                const marker = L.circleMarker([p.lat, p.lon], {
+                    radius: 7,
+                    fillColor: color,
+                    color: '#000',
+                    weight: 1.5,
+                    opacity: 1,
+                    fillOpacity: 0.8,
+                    pane: 'lsrPane'
+                });
+
+                marker.on('click', function(e) {
+                    L.DomEvent.stopPropagation(e);
+                    const fakeAlerts = [{
+                        properties: {
+                            event: `${p.typetext || 'Storm Report'}`,
+                            headline: magnitude ? `${magnitude} reported` : p.typetext,
+                            description: remark || 'No additional details',
+                            sent: p.valid,
+                            expires: null
+                        }
+                    }];
+                    showAlertsModal('Local Storm Report', fakeAlerts);
+                });
+
+                lsrLayerGroup.addLayer(marker);
+            });
+
+            if (lsrVisible) {
+                map.addLayer(lsrLayerGroup);
+            }
+        })
+        .catch(err => {
+            console.error('Failed to load LSR data:', err);
+            lsrVisible = false;
+            localStorage.setItem(LSR_VISIBILITY_KEY, JSON.stringify(false));
+        });
 }
 
 let regularZonesLayer = null;
@@ -651,6 +794,20 @@ function openFilterModal() {
                 This map is customized to only show the alert types below.
             </div>`;
     }
+
+    html += `
+        <div class="layer-section">
+            <div class="layer-section-header">Additional Layers</div>
+            <div class="layer-list">
+                <div class="layer-item">
+                    <span class="layer-label">Local Storm Reports (last 12 hours)</span>
+                    <label class="layer-toggle">
+                        <input type="checkbox" ${lsrVisible ? 'checked' : ''} onchange="toggleLSRLayer(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>`;
 
     html += `
         <div class="layer-section">
@@ -1004,21 +1161,16 @@ function showAlertsModal(title, alerts) {
 
         sortedAlerts.forEach(alert => {
             const p = alert.properties;
-            const color = getAlertColor(p.event);
+            const isLSR = p.event && p.event.startsWith('LSR:');
+            const itemClass = isLSR ? 'alert-item lsr' : 'alert-item';
+            const color = getAlertColor(p.event) || '#888888';
 
-            let issuedText = '';
-            let expiresText = '';
-            if (p.sent || p.expires) {
-                if (p.sent) issuedText = 'Issued: ' + new Date(p.sent).toLocaleString();
-                if (p.expires) expiresText = 'Expires: ' + new Date(p.expires).toLocaleString();
-            }
-
-            const description = p.description || 'No additional details available';
+            const description = p.description || 'No additional details';
 
             content += `
-                <div class="alert-item" style="border-left: 5px solid ${color};">
+                <div class="${itemClass}" style="border-left: 5px solid ${color};">
                     <div class="alert-headline">${p.headline || p.event}</div>
-                    <div class="alert-event" style="color:${color}">${p.event}</div>
+                    <div class="alert-event">${p.event}</div>
                     <div class="alert-description">${description}</div>
                 </div>
             `;
@@ -1173,7 +1325,7 @@ function reprocessAlerts() {
 
 function updateAlerts() {
     const headers = {
-        'User-Agent': 'My Weather App (contact@myweatherapp.com)',
+        'User-Agent': 'StormsAlertApp (contact@stormsalert.com)',
         'Accept': 'application/geo+json'
     };
 
@@ -1330,6 +1482,10 @@ getCachedJson('combined_zones40_fixed.json')
         regularZonesLayer.on('load', () => reapplyZoneStyles());
     })
     .catch(err => console.error('Failed to load combined_zones40_fixed.json:', err));
+
+if (lsrVisible) {
+    loadLSRLayer();
+}
 
 updateAlerts();
 setInterval(updateAlerts, 60000);
