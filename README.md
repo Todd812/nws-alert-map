@@ -24,6 +24,7 @@ Feel free to change the basemap inside the code.  You MUST make sure to attribut
 - **Customizable Alert Colors** – Users can change colors for any alert type and save preferences
 - **Alert Filtering** – Toggle visibility of individual alert types (warnings, watches, advisories, etc.)
 - **Persistent Settings** – Color and visibility preferences saved in browser localStorage
+- **Local Storm Reports** – User can add local storm reports from the gear menu
 - **URL Overrides** – Use `?alerts=` parameter to show only specific alert types (great for embedded or focused views) (Must use NWS standard words commma separated like ?alerts=Severe Thunderstorm Warning,Winter Weather Advisory or as many different alert types as you want.  Default is all alerts.
 - **State-Centric View** – Use `?state=CA` to center and zoom on a specific state
 - **Responsive Design** – Works on desktop, tablet, and mobile
