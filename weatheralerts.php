@@ -150,7 +150,7 @@
             margin-bottom: 6px;
             line-height: 1.3;
         }
-        /* Only LSR items show the event type and in orange */
+        /* Only show event type for LSRs */
         .alert-item:not(.lsr) .alert-event {
             display: none;
         }
@@ -175,6 +175,25 @@
             padding: 80px 20px;
             color: #888;
             font-size: 17px;
+        }
+
+        /* LSR DivIcon - color-coded, smaller (24px), tappable on mobile */
+        .lsr-marker-div > div {
+            width: 100%;
+            height: 100%;
+            border: 3px solid #000;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+        .lsr-marker-div:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .filter-section {
@@ -577,7 +596,7 @@ function toggleOverlayLayer(id, enabled) {
     }
 }
 
-// === Local Storm Reports (LSR) Layer ===
+// === Local Storm Reports (LSR) Layer - Color-coded smaller DivIcon markers ===
 const lsrColors = {
     'AVALANCHE': '#F0F8FF',
     'BLIZZARD': '#87CEEB',
@@ -665,19 +684,22 @@ function loadLSRLayer() {
         .then(data => {
             data.features.forEach(feature => {
                 const p = feature.properties;
-                const typetext = (p.typetext || 'UNKNOWN').toUpperCase().trim();
-                const color = lsrColors[typetext] || lsrColors['default'];
+                const typetext = (p.typetext || 'UNKNOWN').trim();
+                const typeUpper = typetext.toUpperCase();
+                const color = lsrColors[typeUpper] || lsrColors['default'];
 
                 const magnitude = p.magnitude ? `${p.magnitude} ${p.unit || ''}`.trim() : '';
                 const remark = p.remark ? p.remark.trim() : 'No remarks';
 
-                const marker = L.circleMarker([p.lat, p.lon], {
-                    radius: 7,
-                    fillColor: color,
-                    color: '#000',
-                    weight: 1.5,
-                    opacity: 1,
-                    fillOpacity: 0.8,
+                const icon = L.divIcon({
+                    className: 'lsr-marker-div',
+                    html: `<div style="background: ${color};"></div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                const marker = L.marker([p.lat, p.lon], {
+                    icon: icon,
                     pane: 'lsrPane'
                 });
 
@@ -685,8 +707,8 @@ function loadLSRLayer() {
                     L.DomEvent.stopPropagation(e);
                     const fakeAlerts = [{
                         properties: {
-                            event: p.typetext || 'Storm Report',   // Pure type, no "LSR:" prefix
-                            headline: magnitude ? `${magnitude} reported` : p.typetext,
+                            event: typetext,
+                            headline: magnitude ? `${magnitude} reported` : typetext,
                             description: remark || 'No additional details',
                             sent: p.valid,
                             expires: null
@@ -1164,7 +1186,7 @@ function showAlertsModal(title, alerts) {
 
         sortedAlerts.forEach(alert => {
             const p = alert.properties;
-            const isLSR = p.event && !alertColors.hasOwnProperty(p.event); // LSRs don't have entries in alertColors
+            const isLSR = p.event && !alertColors.hasOwnProperty(p.event);
             const itemClass = isLSR ? 'alert-item lsr' : 'alert-item';
             const color = getAlertColor(p.event) || '#888888';
 
