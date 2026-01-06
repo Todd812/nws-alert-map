@@ -1,5 +1,5 @@
 # nws-alert-map
-Interactive real-time map of NWS weather alerts for all US zones, counties, and fire zones with color-coded severity and detailed alert modals for all alert types.
+Interactive real-time map of NWS weather alerts for all US zones, counties, and fire zones with color-coded severity and detailed alert modals for all alert types.  This script maps all NWS alerts that are land based.  I'm working on adding offshore zones to the script.  
 
 # NWS Weather Alerts Map
 
